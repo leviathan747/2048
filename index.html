@@ -11,6 +11,48 @@
   <script type="application/javascript" src="https://unpkg.com/react-dom@16.0.0/umd/react-dom.production.min.js"></script>
   <script type="application/javascript" src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
 
+  <style>
+
+    body {
+      font: 14px "Century Gothic", Futura, sans-serif;
+      margin: 20px;
+    }
+    
+    ol, ul {
+      padding-left: 30px;
+    }
+    
+    .board-row:after {
+      clear: both;
+      content: "";
+      display: table;
+    }
+    
+    .square {
+      background: #fff;
+      border: 1px solid #999;
+      float: left;
+      font-size: 24px;
+      font-weight: bold;
+      line-height: 34px;
+      height: 34px;
+      margin-right: -1px;
+      margin-top: -1px;
+      padding: 0;
+      text-align: center;
+      width: 34px;
+    }
+    
+    .square:focus {
+      outline: none;
+    }
+
+    .red-text {
+      color: red;
+    }
+    
+  </style>
+
 </head>
 
 <body>
@@ -19,16 +61,149 @@
   <script type="text/babel">
 
     const rootElement = document.getElementById('root');
+   
+    function Cell(props) {
+      const val = props.value != 0 ? props.value : '';
+      const classes = props.firstTime ? 'square red-text' : 'square';
+      return (
+        <div className={classes}>{val}</div>
+      );
+    }
 
-    class App extends React.Component {
+    function GameRow(props) {
+      return (
+        <div className="board-row">{props.cells}</div>
+      );
+    }
+
+    class Game extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          size: 4,
+          cells: [],
+          newCell: 0
+        }
+      }
+
+      resetGame(state) {
+        state.cells = new Array(state.size * state.size);
+        state.cells.fill(0);
+        return state;
+      }
+
+      generateCell(state) {
+        const emptyCells = [];
+        for (var i = 0; i < state.cells.length; i++ ) {
+          if (state.cells[i] == 0) {
+            emptyCells.push(i);
+          }
+        }
+        state.newCell = emptyCells[Math.floor(Math.random() * emptyCells.length)]
+        state.cells[state.newCell] = 2;
+        return state;
+      }
+
+      compress(row) {
+        const len = row.length;
+        row = row.filter(x => (x != 0));  // remove 0s
+        for (var i = 1; i < row.length; i++) {  // combine pairs
+          if (row[i-1] == row[i]) {
+            row[i-1] = row[i-1] + row[i];
+            row[i] = 0;
+          }
+        }
+        row = row.filter(x => (x != 0));  // remove 0s again
+        row = row.concat(new Array(len - row.length).fill(0));  // pad with 0s back to original size
+        return row;
+      }
+
+      doMove(code) {
+        let state = this.state;
+        let cells = [];
+        let colcells = []
+        switch (code) {
+        case 0:  // right to left
+          for (var i = 0; i < state.size; i++) {
+            const row = state.cells.slice(i * state.size, i * state.size + state.size);
+            cells = cells.concat(this.compress(row));
+          }
+          break;
+        case 1:  // bottom to top
+          for (var i = 0; i < state.size; i++) {
+            const col = [];
+            for (var j = 0; j < state.size; j++) {
+              col.push(state.cells[j * state.size + i]);
+            }
+            colcells = colcells.concat(this.compress(col));
+          }
+          for (var i = 0; i < state.size; i++) {
+            for (var j = 0; j < state.size; j++) {
+              cells[j * state.size + i] = colcells[i * state.size + j];
+            }
+          }
+          break;
+        case 2:  // left to right
+          for (var i = 0; i < state.size; i++) {
+            const row = state.cells.slice(i * state.size, i * state.size + state.size);
+            cells = cells.concat(this.compress(row.reverse()).reverse());
+          }
+          break;
+        case 3:  // top to bottom
+          for (var i = 0; i < state.size; i++) {
+            const col = [];
+            for (var j = 0; j < state.size; j++) {
+              col.push(state.cells[j * state.size + i]);
+            }
+            colcells = colcells.concat(this.compress(col.reverse()).reverse());
+          }
+          for (var i = 0; i < state.size; i++) {
+            for (var j = 0; j < state.size; j++) {
+              cells[j * state.size + i] = colcells[i * state.size + j];
+            }
+          }
+          break;
+     
+        default:
+          cells = state.cells;
+          console.log('Invalid move code');
+        }
+        state.cells = cells;
+        state = this.generateCell(state);
+        this.setState(state);
+      }
+
+      componentDidMount() {
+        let state = this.resetGame(this.state);
+        state = this.generateCell(state);
+        this.setState(state);
+        const game = this;
+        window.addEventListener('keydown', function(e) {handleKeypress(game, e)});
+      }
+
       render() {
+        const rows = [];
+        for (var i = 0; i < this.state.size; i++) {
+          const row = []
+          for (var j = 0; j < this.state.size; j++) {
+            const index = i * this.state.size + j;
+            row.push(<Cell value={this.state.cells[index]} firstTime={this.state.newCell == index} />);
+          }
+          rows.push(<GameRow cells={row} />);
+        }
         return (
-          <div>Hello World</div>
+          <div onkeypress={this.handleKeypress}>{rows}</div>
         );
       }
     }
 
-    ReactDOM.render(<App/>, rootElement);
+    function handleKeypress(game, event) {
+      if (event.keyCode >= 37 && event.keyCode <= 40) {
+        game.doMove(event.keyCode - 37);
+      }
+    }
+
+    ReactDOM.render(<Game/>, rootElement);
 
   </script>
 
