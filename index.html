@@ -13,17 +13,15 @@
 
   <style>
 
-    body {
-      font: 55px "Century Gothic", Futura, sans-serif;
+    body, button, label, input {
+      font: 20px "Century Gothic", Futura, sans-serif;
       margin: 20px;
     }
 
-    button {
-      font: 55px "Century Gothic", Futura, sans-serif;
-      margin-bottom: 20px;
-      margin-right: 20px;
+    #urlinput {
+      width: 350px;
     }
-    
+
     .board-row:after {
       clear: both;
       content: "";
@@ -85,8 +83,16 @@
           size: 4,
           cells: [],
           score: 0,
-          newCell: 0
+          newCell: 0,
+          url: ''
         }
+        this.resetGame = this.resetGame.bind(this);
+        this.generateCell = this.generateCell.bind(this);
+        this.collapse = this.collapse.bind(this);
+        this.doMove = this.doMove.bind(this);
+        this.handleURLChange = this.handleURLChange.bind(this);
+        this.handleAutoPlay = this.handleAutoPlay.bind(this);
+        this.handleKeypress = this.handleKeypress.bind(this);
       }
 
       resetGame(state) {
@@ -180,12 +186,41 @@
         this.setState(state);
       }
 
+      handleURLChange(event) {
+        const state = this.state;
+        state.url = event.target.value;
+        this.setState(state);
+      }
+
+      handleAutoPlay(event) {
+        const game = this;
+        fetch(this.state.url, {
+          method: 'post',
+          body: JSON.stringify(this.state)
+        }).then(function (resp) {  
+          return resp.json();
+        }).then(function(data) {
+          if (data != undefined && data.move != undefined && data.move >= 0 && data.move <= 3) {
+            game.doMove(data.move);
+          }
+        })  
+        .catch(function (error) {  
+          console.log('Request failure: ', error);  
+        });
+        event.preventDefault();
+      }
+
+      handleKeypress(event) {
+        if (event.keyCode >= 37 && event.keyCode <= 40) {
+          this.doMove(event.keyCode - 37);
+        }
+      }
+
       componentDidMount() {
         let state = this.resetGame(this.state);
         state = this.generateCell(state);
         this.setState(state);
-        const game = this;
-        window.addEventListener('keydown', function(e) {handleKeypress(game, e)});
+        window.addEventListener('keydown', this.handleKeypress);
       }
 
       render() {
@@ -209,14 +244,15 @@
             <button onClick={doReset}>Reset</button>
             <span>Score: {this.state.score}</span>
             <div>{rows}</div>
+            <form onSubmit={this.handleAutoPlay}>
+              <label>
+                Auto-play URL:
+                <input id="urlinput" type="text" value={this.state.url} onChange={this.handleURLChange} />
+              </label>
+              <input type="submit" value="Play" />
+            </form>
           </div>
         );
-      }
-    }
-
-    function handleKeypress(game, event) {
-      if (event.keyCode >= 37 && event.keyCode <= 40) {
-        game.doMove(event.keyCode - 37);
       }
     }
 
