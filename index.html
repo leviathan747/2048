@@ -168,8 +168,10 @@
           cells = state.cells;
           console.log('Invalid move code');
         }
-        state.cells = cells;
-        state = this.generateCell(state);
+        if (JSON.stringify(cells) != JSON.stringify(state.cells)) {
+          state.cells = cells;
+          state = this.generateCell(state);
+        }
         this.setState(state);
       }
 
