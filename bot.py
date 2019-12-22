@@ -1,3 +1,8 @@
+# Simple 2048 bot
+#
+# Alternate between right and down. If two moves in a row result in no change
+# to the board, move left and then continue.
+
 import json
 import flask
 
