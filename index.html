@@ -14,12 +14,14 @@
   <style>
 
     body {
-      font: 14px "Century Gothic", Futura, sans-serif;
+      font: 55px "Century Gothic", Futura, sans-serif;
       margin: 20px;
     }
-    
-    ol, ul {
-      padding-left: 30px;
+
+    button {
+      font: 55px "Century Gothic", Futura, sans-serif;
+      margin-bottom: 20px;
+      margin-right: 20px;
     }
     
     .board-row:after {
@@ -32,15 +34,15 @@
       background: #fff;
       border: 1px solid #999;
       float: left;
-      font-size: 24px;
+      font-size: 75px;
       font-weight: bold;
-      line-height: 34px;
-      height: 34px;
+      line-height: 170px;
+      height: 170px;
       margin-right: -1px;
       margin-top: -1px;
       padding: 0;
       text-align: center;
-      width: 34px;
+      width: 170px;
     }
     
     .square:focus {
@@ -50,7 +52,7 @@
     .red-text {
       color: red;
     }
-    
+
   </style>
 
 </head>
@@ -82,6 +84,7 @@
         this.state = {
           size: 4,
           cells: [],
+          score: 0,
           newCell: 0
         }
       }
@@ -89,6 +92,7 @@
       resetGame(state) {
         state.cells = new Array(state.size * state.size);
         state.cells.fill(0);
+        state.score = 0;
         return state;
       }
 
@@ -104,13 +108,14 @@
         return state;
       }
 
-      compress(row) {
+      collapse(row, state) {
         const len = row.length;
         row = row.filter(x => (x != 0));  // remove 0s
         for (var i = 1; i < row.length; i++) {  // combine pairs
           if (row[i-1] == row[i]) {
             row[i-1] = row[i-1] + row[i];
             row[i] = 0;
+            state.score += row[i-1];
           }
         }
         row = row.filter(x => (x != 0));  // remove 0s again
@@ -126,7 +131,7 @@
         case 0:  // right to left
           for (var i = 0; i < state.size; i++) {
             const row = state.cells.slice(i * state.size, i * state.size + state.size);
-            cells = cells.concat(this.compress(row));
+            cells = cells.concat(this.collapse(row, state));
           }
           break;
         case 1:  // bottom to top
@@ -135,7 +140,7 @@
             for (var j = 0; j < state.size; j++) {
               col.push(state.cells[j * state.size + i]);
             }
-            colcells = colcells.concat(this.compress(col));
+            colcells = colcells.concat(this.collapse(col, state));
           }
           for (var i = 0; i < state.size; i++) {
             for (var j = 0; j < state.size; j++) {
@@ -146,7 +151,7 @@
         case 2:  // left to right
           for (var i = 0; i < state.size; i++) {
             const row = state.cells.slice(i * state.size, i * state.size + state.size);
-            cells = cells.concat(this.compress(row.reverse()).reverse());
+            cells = cells.concat(this.collapse(row.reverse(), state).reverse());
           }
           break;
         case 3:  // top to bottom
@@ -155,7 +160,7 @@
             for (var j = 0; j < state.size; j++) {
               col.push(state.cells[j * state.size + i]);
             }
-            colcells = colcells.concat(this.compress(col.reverse()).reverse());
+            colcells = colcells.concat(this.collapse(col.reverse(), state).reverse());
           }
           for (var i = 0; i < state.size; i++) {
             for (var j = 0; j < state.size; j++) {
@@ -193,8 +198,18 @@
           }
           rows.push(<GameRow cells={row} />);
         }
+        const game = this;
+        const doReset = function() {
+          let state = game.resetGame(game.state);
+          state = game.generateCell(state);
+          game.setState(state);
+        }
         return (
-          <div onkeypress={this.handleKeypress}>{rows}</div>
+          <div>
+            <button onClick={doReset}>Reset</button>
+            <span>Score: {this.state.score}</span>
+            <div>{rows}</div>
+          </div>
         );
       }
     }
