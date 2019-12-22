@@ -14,21 +14,28 @@ numMatches = 0
 
 @app.route('/move', methods=['POST'])
 def getMove():
-    global lastMove, lastBoard, numMatches
     data = json.loads(flask.request.get_data())
-    if data['cells'] == lastBoard:
+    if 'size' in data and 'cells' in data and 'score' in data:
+        move = calculateMove(data['size'], data['cells'], data['score'])
+        resp = flask.Response(json.dumps({'move': move}))
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        return resp
+    else:
+        return 400, 'Request did not contain correct data.'
+
+def calculateMove(size, cells, score):
+    global lastMove, lastBoard, numMatches
+    if cells == lastBoard:
         numMatches += 1
     else:
         numMatches = 0
-    lastBoard = data['cells']
+    lastBoard = cells
     if numMatches >= 2:
         # go left to break out of stalemate
         lastMove = 0
     else:
         # alternate between right and down
         lastMove = 3 if lastMove != 3 else 2
-    resp = flask.Response(json.dumps({'move': lastMove}))
-    resp.headers['Access-Control-Allow-Origin'] = '*'
-    return resp
+    return lastMove
 
 app.run()
