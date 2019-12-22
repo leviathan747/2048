@@ -247,7 +247,8 @@
           newCell: 0,
           url: '',
           autoPlayOn: false,
-          autoPlayInterval: 100
+          autoPlayInterval: 100,
+          errorMessage: ''
         }
         this.resetGame = this.resetGame.bind(this);
         this.generateCell = this.generateCell.bind(this);
@@ -347,6 +348,7 @@
           state.cells = cells;
           state = this.generateCell(state);
         }
+        state.errorMessage = '';
         this.setState(state);
       }
 
@@ -359,6 +361,7 @@
       handleAutoPlay(event) {
         const state = this.state;
         state.autoPlayOn = state.autoPlayOn ? false : true;
+        state.errorMessage = '';
         this.setState(state);
         event.preventDefault();
       }
@@ -376,7 +379,9 @@
           }
         })  
         .catch(function (error) {  
-          console.log('Request failure: ', error);  
+          const state = game.state;
+          state.errorMessage = `Request failure: ${error}`;
+          game.setState(state);
         });
       }
 
@@ -448,6 +453,13 @@
                     </form>
                   </div>
                 </div>
+                {this.state.errorMessage != '' ? (
+                <div className="row">
+                  <div className="col s12 red-text">{this.state.errorMessage}</div>
+                </div>
+                ) : (
+                null
+                )}
                 <div className="row">
                   <div className="col s12">
                     <a href="https://github.com/leviathan747/2048">GitHub project</a>
