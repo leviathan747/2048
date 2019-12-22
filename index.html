@@ -233,7 +233,7 @@
         const game = this;
         fetch(this.state.url, {
           method: 'post',
-          body: JSON.stringify(this.state)
+          body: JSON.stringify({size: this.state.size, cells: this.state.cells, score: this.state.score})
         }).then(function (resp) {  
           return resp.json();
         }).then(function(data) {
