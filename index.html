@@ -7,44 +7,147 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta charset="UTF-8"/>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <script type="application/javascript" src="https://unpkg.com/react@16.0.0/umd/react.production.min.js"></script>
   <script type="application/javascript" src="https://unpkg.com/react-dom@16.0.0/umd/react-dom.production.min.js"></script>
   <script type="application/javascript" src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
 
   <style>
 
-    body, button, label, input {
-      font: 20px "Century Gothic", Futura, sans-serif;
-      margin: 20px;
+    body {
+      font: "Century Gothic", Futura, sans-serif;
+      background-color: #000;
+      color: #fff;
     }
 
-    #urlinput {
-      width: 350px;
+    input, a {
+      color: #fff;
     }
 
-    .board-row:after {
-      clear: both;
-      content: "";
-      display: table;
-    }
-    
-    .square {
-      background: #fff;
-      border: 1px solid #999;
-      float: left;
-      font-size: 75px;
+    h1 {
       font-weight: bold;
-      line-height: 170px;
-      height: 170px;
-      margin-right: -1px;
-      margin-top: -1px;
-      padding: 0;
-      text-align: center;
-      width: 170px;
     }
-    
-    .square:focus {
-      outline: none;
+
+    .score {
+      float: right;
+      font-size: 18pt;
+      font-weight: bold;
+    }
+
+    .board-container {
+      padding: 5px;
+      background-color: #333;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .board-row {
+      margin: 0 !important;
+    }
+
+    .cell {
+      position: relative;
+      float: left;
+      width: 25%;
+    }
+
+    .cell:after {
+      content: "";
+      display: block;
+      padding-bottom: 100%;
+    }
+
+    .cell-inner {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 5px;
+    }
+
+    .cell-content {
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      background-color: #666;
+    }
+
+    .cell-content::before {
+      content: '';
+      display: inline-block;
+      height: 100%;
+      vertical-align: middle;
+    }
+
+    .cell-centered {
+      display: inline-block;
+      width: 100%;
+      vertical-align: middle;
+      text-align: center;
+      text-shadow: 0 0 5px #000;
+    }
+
+    .tile-0 {
+      background-color: #666;
+    }
+
+    .tile-1 {
+      background-color: #66ccff;
+    }
+
+    .tile-2 {
+      background-color: #ffff99;
+    }
+
+    .tile-3 {
+      background-color: #ff66ff;
+    }
+
+    .tile-4 {
+      background-color: #ff9933;
+    }
+
+    .tile-5 {
+      background-color: #00ffcc;
+    }
+
+    .tile-6 {
+      background-color: #9966ff;
+    }
+
+    .tile-7 {
+      background-color: #ff5050;
+    }
+
+    .tile-8 {
+      background-color: #669999;
+    }
+
+    .tile-9 {
+      background-color: #ffcc00;
+    }
+
+    .tile-10 {
+      background-color: #3366cc;
+    }
+
+    .tile-11 {
+      background-color: #9999ff;
+    }
+
+    .gray-btn {
+      background-color: #333;
+    }
+
+    .gray-btn:hover {
+      background-color: #555;
+    }
+
+    .red-btn {
+      background-color: #f00;
+    }
+
+    .red-btn:hover {
+      background-color: #faa;
     }
 
     .red-text {
@@ -62,23 +165,54 @@
 
     const rootElement = document.getElementById('root');
    
-    function Cell(props) {
-      const val = props.value != 0 ? props.value : '';
-      const classes = props.firstTime ? 'square red-text' : 'square';
-      return (
-        <div className={classes}>{val}</div>
-      );
+    class Cell extends React.Component {
+      constructor(props) {
+        super(props);
+      }
+
+      componentDidUpdate() {
+        if (this.props.value > 0) {
+          const digits = Math.ceil(Math.log10(this.props.value));
+          if (digits >= 1 && digits <= 3) {
+            fitText(this.textElement, 0.2);
+          }
+          else if (digits >= 4 && digits <= 6) {
+            fitText(this.textElement, 0.4);
+          }
+          else {
+            fitText(this.textElement, 0.6);
+          }
+        }
+      }
+
+      render() {
+        const val = this.props.value != 0 ? this.props.value : '';
+        const styleKey = (Math.floor(Math.log2(this.props.value)) - 1) % 11 + 1;
+        let classes = `cell-content tile-${styleKey}`;
+        if (this.props.firstTime) {
+          classes += ' red-text';
+        }
+        return (
+          <div className="cell"><div className="cell-inner">
+            <div className={classes}>
+              <div className="cell-centered" ref={el => (this.textElement = el)}>
+              {val}
+              </div>
+            </div>
+          </div></div>
+        );
+      }
     }
 
     function GameRow(props) {
       return (
-        <div className="board-row">{props.cells}</div>
+        <div className="row board-row">{props.cells}</div>
       );
     }
 
     function PlayButton(props) {
       return (
-        <input type="submit" value="Play" />
+        <input className="btn-large gray-btn" type="submit" value="Play" />
       );
     }
 
@@ -98,7 +232,7 @@
 
       render() {
         return (
-          <input type="submit" value="Stop" />
+          <input className="btn-large red-btn" type="submit" value="Stop" />
         );
       }
     }
@@ -276,21 +410,51 @@
           game.setState(state);
         }
         return (
-          <div>
-            <button onClick={doReset}>Reset</button>
-            <span>Score: {this.state.score}</span>
-            <div>{rows}</div>
-            <form onSubmit={this.handleAutoPlay}>
-              <label>
-                Auto-play URL:
-                <input id="urlinput" type="text" value={this.state.url} onChange={this.handleURLChange} />
-              </label>
-              {this.state.autoPlayOn ? (
-              <StopButton callback={this.getAutoMove} interval={this.state.autoPlayInterval} />
-              ) : (
-              <PlayButton />
-              )}
-            </form>
+          <div className="container">
+            <div className="row">
+              <div className="col l6 offset-l3 s12">
+                <div className="row">
+                  <div className="col s12">
+                    <h1>2048</h1>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col s12">
+                    <div className="btn gray-btn" onClick={doReset}>Reset</div>
+                    <span className="score">Score: {this.state.score}</span>
+                  </div>
+                </div>
+                <div className="board-container">
+                  {rows}
+                </div>
+                <div className="row">
+                  <div className="col s12">
+                    <form onSubmit={this.handleAutoPlay}>
+                      <div className="row">
+                        <div className="col s9">
+                          <label>
+                            Auto-play URL:
+                            <input id="urlinput" type="text" value={this.state.url} onChange={this.handleURLChange} />
+                          </label>
+                        </div>
+                        <div className="col s3">
+                          {this.state.autoPlayOn ? (
+                          <StopButton callback={this.getAutoMove} interval={this.state.autoPlayInterval} />
+                          ) : (
+                          <PlayButton />
+                          )}
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col s12">
+                    <a href="https://github.com/leviathan747/2048">GitHub project</a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         );
       }
@@ -300,9 +464,69 @@
 
   </script>
 
+  <script type="text/javascript">
+    /*!
+    * FitText.js 1.0 jQuery free version
+    *
+    * Copyright 2011, Dave Rupert http://daverupert.com
+    * Released under the WTFPL license
+    * http://sam.zoy.org/wtfpl/
+    * Modified by Slawomir Kolodziej http://slawekk.info
+    *
+    * Date: Tue Aug 09 2011 10:45:54 GMT+0200 (CEST)
+    */
+    (function(){
+    
+      var addEvent = function (el, type, fn) {
+        if (el.addEventListener)
+          el.addEventListener(type, fn, false);
+    		else
+    			el.attachEvent('on'+type, fn);
+      };
+    
+      var extend = function(obj,ext){
+        for(var key in ext)
+          if(ext.hasOwnProperty(key))
+            obj[key] = ext[key];
+        return obj;
+      };
+    
+      window.fitText = function (el, kompressor, options) {
+    
+        var settings = extend({
+          'minFontSize' : -1/0,
+          'maxFontSize' : 1/0
+        },options);
+    
+        var fit = function (el) {
+          var compressor = kompressor || 1;
+    
+          var resizer = function () {
+            el.style.fontSize = Math.max(Math.min(el.clientWidth / (compressor*10), parseFloat(settings.maxFontSize)), parseFloat(settings.minFontSize)) + 'px';
+          };
+    
+          // Call once to set.
+          resizer();
+    
+          // Bind events
+          // If you have any js library which support Events, replace this part
+          // and remove addEvent function (or use original jQuery version)
+          addEvent(window, 'resize', resizer);
+          addEvent(window, 'orientationchange', resizer);
+        };
+    
+        if (el.length)
+          for(var i=0; i<el.length; i++)
+            fit(el[i]);
+        else
+          fit(el);
+    
+        // return set of elements
+        return el;
+      };
+    })();
+  </script>
+
 </body>
-<footer>
-  <a href="https://github.com/leviathan747/2048">GitHub project</a>
-</footer>
 
 </html>
