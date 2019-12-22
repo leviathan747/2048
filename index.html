@@ -76,6 +76,33 @@
       );
     }
 
+    function PlayButton(props) {
+      return (
+        <input type="submit" value="Play" />
+      );
+    }
+
+    class StopButton extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {intervalId: null}
+      }
+
+      componentDidMount() {
+        this.setState({intervalId: setInterval(this.props.callback, this.props.interval)});
+      }
+
+      componentWillUnmount() {
+        clearInterval(this.state.intervalId);
+      }
+
+      render() {
+        return (
+          <input type="submit" value="Stop" />
+        );
+      }
+    }
+
     class Game extends React.Component {
       constructor(props) {
         super(props);
@@ -84,7 +111,9 @@
           cells: [],
           score: 0,
           newCell: 0,
-          url: ''
+          url: '',
+          autoPlayOn: false,
+          autoPlayInterval: 100
         }
         this.resetGame = this.resetGame.bind(this);
         this.generateCell = this.generateCell.bind(this);
@@ -92,6 +121,7 @@
         this.doMove = this.doMove.bind(this);
         this.handleURLChange = this.handleURLChange.bind(this);
         this.handleAutoPlay = this.handleAutoPlay.bind(this);
+        this.getAutoMove = this.getAutoMove.bind(this);
         this.handleKeypress = this.handleKeypress.bind(this);
       }
 
@@ -193,6 +223,13 @@
       }
 
       handleAutoPlay(event) {
+        const state = this.state;
+        state.autoPlayOn = state.autoPlayOn ? false : true;
+        this.setState(state);
+        event.preventDefault();
+      }
+
+      getAutoMove() {
         const game = this;
         fetch(this.state.url, {
           method: 'post',
@@ -207,7 +244,6 @@
         .catch(function (error) {  
           console.log('Request failure: ', error);  
         });
-        event.preventDefault();
       }
 
       handleKeypress(event) {
@@ -249,7 +285,11 @@
                 Auto-play URL:
                 <input id="urlinput" type="text" value={this.state.url} onChange={this.handleURLChange} />
               </label>
-              <input type="submit" value="Play" />
+              {this.state.autoPlayOn ? (
+              <StopButton callback={this.getAutoMove} interval={this.state.autoPlayInterval} />
+              ) : (
+              <PlayButton />
+              )}
             </form>
           </div>
         );
