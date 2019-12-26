@@ -63,34 +63,6 @@
       );
     }
 
-    function PlayButton(props) {
-      const classes = props.disabled ? 'btn-large gray-btn hide' : 'btn-large gray-btn';
-      return (
-        <input className={classes} type="submit" value="Play"/>
-      );
-    }
-
-    class StopButton extends React.Component {
-      constructor(props) {
-        super(props);
-        this.state = {intervalId: null}
-      }
-
-      componentDidMount() {
-        this.setState({intervalId: setInterval(this.props.callback, this.props.interval)});
-      }
-
-      componentWillUnmount() {
-        clearInterval(this.state.intervalId);
-      }
-
-      render() {
-        return (
-          <input className="btn-large red-btn" type="submit" value="Stop" />
-        );
-      }
-    }
-
     class Game extends React.Component {
       constructor(props) {
         super(props);
@@ -100,7 +72,6 @@
           score: 0,
           newCell: 0,
           url: '',
-          autoPlayOn: false,
           autoPlayInterval: 100,
           errorMessage: ''
         }
@@ -109,7 +80,7 @@
         this.collapse = this.collapse.bind(this);
         this.doMove = this.doMove.bind(this);
         this.handleURLChange = this.handleURLChange.bind(this);
-        this.handleAutoPlay = this.handleAutoPlay.bind(this);
+        this.handleAutoPlayChange = this.handleAutoPlayChange.bind(this);
         this.getAutoMove = this.getAutoMove.bind(this);
         this.handleKeypress = this.handleKeypress.bind(this);
       }
@@ -213,12 +184,16 @@
         this.setState(state);
       }
 
-      handleAutoPlay(event) {
+      handleAutoPlayChange(event) {
         const state = this.state;
-        state.autoPlayOn = state.autoPlayOn ? false : true;
-        state.errorMessage = '';
+        if (event.target.checked) {
+          this.intervalId = setInterval(this.getAutoMove, state.autoPlayInterval);
+        }
+        else {
+          state.errorMessage = '';
+          clearInterval(this.intervalId);
+        }
         this.setState(state);
-        event.preventDefault();
       }
 
       getAutoMove() {
@@ -270,7 +245,6 @@
           state = game.generateCell(state);
           game.setState(state);
         }
-        const textInputClasses = this.state.url == '' ? 'col s12' : 'col s9';
         return (
           <div className="container">
             <div className="row">
@@ -291,28 +265,23 @@
                 </div>
                 <div className="row">
                   <div className="col s12">
-                    <form onSubmit={this.handleAutoPlay}>
+                    <form>
                       <div className="row">
-                        <div className={textInputClasses}>
+                        <div className="col s12">
                           <label>
                             Auto-play URL:
-                            <input id="urlinput" type="text" value={this.state.url} onChange={this.handleURLChange} />
+                            <input type="text" value={this.state.url} onChange={this.handleURLChange} />
                           </label>
+                          {this.state.url != '' ? (
                           <div class="switch">
                             <label>
                               Off
-                              <input type="checkbox"/>
+                              <input type="checkbox" onChange={this.handleAutoPlayChange}/>
                               <span class="lever"></span>
                               On
                             </label>
                           </div>
-                        </div>
-                        <div className="col s3">
-                          {this.state.autoPlayOn ? (
-                          <StopButton callback={this.getAutoMove} interval={this.state.autoPlayInterval} />
-                          ) : (
-                          null
-                          )}
+                          ) : (null)}
                         </div>
                       </div>
                     </form>
