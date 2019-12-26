@@ -1,0 +1,139 @@
+body {
+  font: "Century Gothic", Futura, sans-serif;
+  background-color: #000;
+  color: #fff;
+}
+
+input, a {
+  color: #fff;
+}
+
+h1 {
+  font-weight: bold;
+}
+
+.score {
+  float: right;
+  font-size: 18pt;
+  font-weight: bold;
+}
+
+.board-container {
+  padding: 5px;
+  background-color: #333;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.board-row {
+  margin: 0 !important;
+}
+
+.cell {
+  position: relative;
+  float: left;
+  width: 25%;
+}
+
+.cell:after {
+  content: "";
+  display: block;
+  padding-bottom: 100%;
+}
+
+.cell-inner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+}
+
+.cell-content {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  background-color: #666;
+}
+
+.cell-content::before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.cell-centered {
+  display: inline-block;
+  width: 100%;
+  vertical-align: middle;
+  text-align: center;
+  text-shadow: 0 0 5px #000;
+}
+
+.tile-0 {
+  background-color: #666;
+}
+
+.tile-1 {
+  background-color: #66ccff;
+}
+
+.tile-2 {
+  background-color: #ffff99;
+}
+
+.tile-3 {
+  background-color: #ff66ff;
+}
+
+.tile-4 {
+  background-color: #ff9933;
+}
+
+.tile-5 {
+  background-color: #00ffcc;
+}
+
+.tile-6 {
+  background-color: #9966ff;
+}
+
+.tile-7 {
+  background-color: #ff5050;
+}
+
+.tile-8 {
+  background-color: #669999;
+}
+
+.tile-9 {
+  background-color: #ffcc00;
+}
+
+.tile-10 {
+  background-color: #3366cc;
+}
+
+.tile-11 {
+  background-color: #9999ff;
+}
+
+.gray-btn {
+  background-color: #333;
+}
+
+.gray-btn:hover {
+  background-color: #555;
+}
+
+.red-btn {
+  background-color: #f00;
+}
+
+.red-btn:hover {
+  background-color: #faa;
+}
+
+.red-text {
+  color: red;
+}

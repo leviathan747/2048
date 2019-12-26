@@ -1,171 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <title>2048</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta charset="UTF-8"/>
   <meta name="theme-color" content="#000" />
-
   <link rel="stylesheet" href="materialize.min.css">
+  <link rel="stylesheet" href="2048.css">
   <script type="application/javascript" src="https://unpkg.com/react@16.0.0/umd/react.production.min.js"></script>
   <script type="application/javascript" src="https://unpkg.com/react-dom@16.0.0/umd/react-dom.production.min.js"></script>
   <script type="application/javascript" src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
-
-  <style>
-
-    body {
-      font: "Century Gothic", Futura, sans-serif;
-      background-color: #000;
-      color: #fff;
-    }
-
-    input, a {
-      color: #fff;
-    }
-
-    h1 {
-      font-weight: bold;
-    }
-
-    .score {
-      float: right;
-      font-size: 18pt;
-      font-weight: bold;
-    }
-
-    .board-container {
-      padding: 5px;
-      background-color: #333;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    .board-row {
-      margin: 0 !important;
-    }
-
-    .cell {
-      position: relative;
-      float: left;
-      width: 25%;
-    }
-
-    .cell:after {
-      content: "";
-      display: block;
-      padding-bottom: 100%;
-    }
-
-    .cell-inner {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      padding: 5px;
-    }
-
-    .cell-content {
-      width: 100%;
-      height: 100%;
-      border-radius: 10px;
-      background-color: #666;
-    }
-
-    .cell-content::before {
-      content: '';
-      display: inline-block;
-      height: 100%;
-      vertical-align: middle;
-    }
-
-    .cell-centered {
-      display: inline-block;
-      width: 100%;
-      vertical-align: middle;
-      text-align: center;
-      text-shadow: 0 0 5px #000;
-    }
-
-    .tile-0 {
-      background-color: #666;
-    }
-
-    .tile-1 {
-      background-color: #66ccff;
-    }
-
-    .tile-2 {
-      background-color: #ffff99;
-    }
-
-    .tile-3 {
-      background-color: #ff66ff;
-    }
-
-    .tile-4 {
-      background-color: #ff9933;
-    }
-
-    .tile-5 {
-      background-color: #00ffcc;
-    }
-
-    .tile-6 {
-      background-color: #9966ff;
-    }
-
-    .tile-7 {
-      background-color: #ff5050;
-    }
-
-    .tile-8 {
-      background-color: #669999;
-    }
-
-    .tile-9 {
-      background-color: #ffcc00;
-    }
-
-    .tile-10 {
-      background-color: #3366cc;
-    }
-
-    .tile-11 {
-      background-color: #9999ff;
-    }
-
-    .gray-btn {
-      background-color: #333;
-    }
-
-    .gray-btn:hover {
-      background-color: #555;
-    }
-
-    .red-btn {
-      background-color: #f00;
-    }
-
-    .red-btn:hover {
-      background-color: #faa;
-    }
-
-    .red-text {
-      color: red;
-    }
-
-  </style>
-
+  <script type="application/javascript" src="fittext.js"></script>
+  <script type="application/javascript" src="swipe.js"></script>
 </head>
-
 <body>
   <div id="root"></div>
-
   <script type="text/babel">
-
     const rootElement = document.getElementById('root');
-   
+
     class Cell extends React.Component {
       constructor(props) {
         super(props);
@@ -430,7 +282,7 @@
                 </div>
                 <div className="row">
                   <div className="col s12">
-                    <div className="btn gray-btn" onClick={doReset}>Reset</div>
+                    <div className="btn" onClick={doReset}>Reset</div>
                     <span className="score">Score: {this.state.score}</span>
                   </div>
                 </div>
@@ -446,12 +298,20 @@
                             Auto-play URL:
                             <input id="urlinput" type="text" value={this.state.url} onChange={this.handleURLChange} />
                           </label>
+                          <div class="switch">
+                            <label>
+                              Off
+                              <input type="checkbox"/>
+                              <span class="lever"></span>
+                              On
+                            </label>
+                          </div>
                         </div>
                         <div className="col s3">
                           {this.state.autoPlayOn ? (
                           <StopButton callback={this.getAutoMove} interval={this.state.autoPlayInterval} />
                           ) : (
-                          <PlayButton disabled={this.state.url == ''}/>
+                          null
                           )}
                         </div>
                       </div>
@@ -473,123 +333,6 @@
     }
 
     ReactDOM.render(<Game/>, rootElement);
-
   </script>
-
-  <script type="text/javascript">
-    /*!
-    * FitText.js 1.0 jQuery free version
-    *
-    * Copyright 2011, Dave Rupert http://daverupert.com
-    * Released under the WTFPL license
-    * http://sam.zoy.org/wtfpl/
-    * Modified by Slawomir Kolodziej http://slawekk.info
-    *
-    * Date: Tue Aug 09 2011 10:45:54 GMT+0200 (CEST)
-    */
-    (function(){
-    
-      let addEvent = function (el, type, fn) {
-        if (el.addEventListener)
-          el.addEventListener(type, fn, false);
-    		else
-    			el.attachEvent('on'+type, fn);
-      };
-    
-      let extend = function(obj,ext){
-        for(let key in ext)
-          if(ext.hasOwnProperty(key))
-            obj[key] = ext[key];
-        return obj;
-      };
-    
-      window.fitText = function (el, kompressor, options) {
-    
-        let settings = extend({
-          'minFontSize' : -1/0,
-          'maxFontSize' : 1/0
-        },options);
-    
-        let fit = function (el) {
-          let compressor = kompressor || 1;
-    
-          let resizer = function () {
-            el.style.fontSize = Math.max(Math.min(el.clientWidth / (compressor*10), parseFloat(settings.maxFontSize)), parseFloat(settings.minFontSize)) + 'px';
-          };
-    
-          // Call once to set.
-          resizer();
-    
-          // Bind events
-          // If you have any js library which support Events, replace this part
-          // and remove addEvent function (or use original jQuery version)
-          addEvent(window, 'resize', resizer);
-          addEvent(window, 'orientationchange', resizer);
-        };
-    
-        if (el.length)
-          for(let i=0; i<el.length; i++)
-            fit(el[i]);
-        else
-          fit(el);
-    
-        // return set of elements
-        return el;
-      };
-    })();
-  </script>
-
-  <script type="text/javascript">
-
-    let threshold = 50;     // required min distance traveled to be considered swipe
-    let restraint = 45;     // maximum distance allowed at the same time in perpendicular direction
-    let allowedTime = 300;  // maximum time allowed to travel that distance
-
-    // credit: http://www.javascriptkit.com/javatutors/touchevents2.shtml
-    function swipedetect(touchsurface, callback) {
-    
-      let swipedir = undefined;
-      let startX = undefined;
-      let startY = undefined;
-      let distX = undefined;
-      let distY = undefined;
-      let elapsedTime = undefined;
-      let startTime = undefined;
-      let handleswipe = callback || function(swipedir){};
-    
-      touchsurface.addEventListener('touchstart', function(e) {
-        let touchobj = e.changedTouches[0];
-        swipedir = -1;
-        startX = touchobj.pageX;
-        startY = touchobj.pageY;
-        startTime = new Date().getTime();  // record time when finger first makes contact with surface
-        e.preventDefault();
-      }, false);
-    
-      touchsurface.addEventListener('touchmove', function(e) {
-        e.preventDefault();  // prevent scrolling when inside DIV
-      }, false);
-    
-      touchsurface.addEventListener('touchend', function(e) {
-        let touchobj = e.changedTouches[0];
-        distX = touchobj.pageX - startX;  // get horizontal dist traveled by finger while in contact with surface
-        distY = touchobj.pageY - startY;  // get vertical dist traveled by finger while in contact with surface
-        elapsedTime = new Date().getTime() - startTime;  // get time elapsed
-        if (elapsedTime <= allowedTime) {  // first condition for swipe met
-          if (Math.abs(distX) >= threshold && Math.abs(distY) <= restraint) {  // 2nd condition for horizontal swipe met
-            swipedir = (distX < 0)? 0 : 2;  // if dist traveled is negative, it indicates left swipe
-          }
-          else if (Math.abs(distY) >= threshold && Math.abs(distX) <= restraint) {  // 2nd condition for vertical swipe met
-            swipedir = (distY < 0)? 1 : 3;  // if dist traveled is negative, it indicates up swipe
-          }
-        }
-        handleswipe(swipedir);
-        e.preventDefault();
-      }, false)
-    }
-
-  </script>
-
 </body>
-
 </html>
